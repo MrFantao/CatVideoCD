@@ -14,21 +14,21 @@ spec:
         app: influxdb
     spec:
       containers:
-        - name: setup-data
-          image: curlimages/curl:latest
-          restartPolicy: Always
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              # Wait for the InfluxDB container (shared localhost)
-              until curl -s http://localhost:8181/health; do
-                echo "Waiting for InfluxDB..."
-                sleep 3
-              done
-              echo "InfluxDB is up! Writing initial data..."
-              curl -i -X POST "http://localhost:8181/api/v2/write?bucket=ecodata&precision=s" --data-binary "ecodata,user=123 power=1323.12,energy=45.20,carbon=0.85 1739371664"
-              curl -i -X POST "http://localhost:8181/api/v2/write?bucket=ecodata&precision=s" --data-binary "ecodata,user=123 power=1323.12,energy=45.20,carbon=0.85 1739371663"
-              tail -f /dev/null
+        #- name: setup-data
+        #  image: curlimages/curl:latest
+        #  restartPolicy: Always
+        #  command: ["/bin/sh", "-c"]
+        #  args:
+        #    - |
+        #      # Wait for the InfluxDB container (shared localhost)
+        #      until curl -s http://localhost:8181/health; do
+        #        echo "Waiting for InfluxDB..."
+        #        sleep 3
+        #      done
+        #      echo "InfluxDB is up! Writing initial data..."
+        #      curl -i -X POST "http://localhost:8181/api/v2/write?bucket=ecodata&precision=s" --data-binary "ecodata,user=123 power=1323.12,energy=45.20,carbon=0.85 1739371664"
+        #      curl -i -X POST "http://localhost:8181/api/v2/write?bucket=ecodata&precision=s" --data-binary "ecodata,user=123 power=1323.12,energy=45.20,carbon=0.85 1739371663"
+        #      tail -f /dev/null
         - name: influxdb
           image: influxdb:3-core # Or your preferred version
           env:
