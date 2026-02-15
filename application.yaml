@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cat-video
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/MrFantao/CatVideoCD'
+    targetRevision: HEAD                                  # Branch or Tag
+    path: cat-video
+    helm:
+      # You can override values.yaml settings here
+      valueFiles:
+        - values.yaml
+      #parameters:
+      #  - name: "replicaCount"
+      #    value: "3"
+  destination:
+    server: 'https://kubernetes.default.svc'             # Local cluster
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true                                        # Deletes resources not in Git
+      selfHeal: true                                     # Fixes manual cluster changes
