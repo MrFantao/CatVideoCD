@@ -1,0 +1,39 @@
+appName: cat-video
+
+agent:
+  name: agent
+  image:
+    repository: 10.255.32.84:5000/agent
+    tag: latest
+  
+  replicaCount: 1 
+
+  service:
+    type: NodePort
+    port: 3333 
+    targetPort: 3333
+    nodePort: 30333
+
+seif:
+  name: seif
+  image:
+    repository: 10.255.32.84:5000/seif
+    tag: latest
+  
+  replicaCount: 1 
+  service:
+    type: ClusterIP
+    port: 50051 
+    targetPort: 50051
+
+influxdb:
+  name: influxdb
+  image:
+    repository: influxdb
+    tag: 3-core
+  
+  replicaCount: 1 
+  service:
+    type: ClusterIP
+    port: 8181 
+    targetPort: 8181

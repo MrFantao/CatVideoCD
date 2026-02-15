@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-deployment
+  labels:
+    app: {{ .Values.agent.name }}
+spec:
+  replicas: {{ .Values.agent.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.agent.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.agent.name }}
+    spec:
+      containers:
+        - name: {{ .Values.agent.name }}
+          env:
+            - name: SEIF_HOST
+              value: "seif-svc.default.svc.cluster.local:50051"
+            - name: AGENT_HOST
+              value: ":3333"
+          image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.agent.service.targetPort }}

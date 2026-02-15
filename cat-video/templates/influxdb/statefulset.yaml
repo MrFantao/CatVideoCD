@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: influxdb
+spec:
+  serviceName: "influxdb"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      containers:
+        - name: setup-data
+          image: curlimages/curl:latest
+          restartPolicy: Always
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Wait for the InfluxDB container (shared localhost)
+              until curl -s http://localhost:8181/health; do
+                echo "Waiting for InfluxDB..."
+                sleep 3
+              done
+              echo "InfluxDB is up! Writing initial data..."
+              curl -i -X POST "http://localhost:8181/api/v2/write?bucket=ecodata&precision=s" --data-binary "ecodata,user=123 power=1323.12,energy=45.20,carbon=0.85 1739371664"
+              curl -i -X POST "http://localhost:8181/api/v2/write?bucket=ecodata&precision=s" --data-binary "ecodata,user=123 power=1323.12,energy=45.20,carbon=0.85 1739371663"
+              tail -f /dev/null
+        - name: influxdb
+          image: influxdb:3-core # Or your preferred version
+          env:
+            - name: DOCKER_INFLUXDB_INIT_MODE
+              value: "setup"
+            - name: DOCKER_INFLUXDB_INIT_USERNAME
+              value: "admin"
+            - name: DOCKER_INFLUXDB_INIT_PASSWORD
+              value: "password123"
+            - name: DOCKER_INFLUXDB_INIT_ORG
+              value: "my-org"
+            - name: DOCKER_INFLUXDB_INIT_BUCKET
+              value: "ecodata"
+            - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+              value: "my-token"
+            - name: INFLUXDB_HTTP_BIND_ADDRESS
+              value: "0.0.0.0:8181"
+          image: "{{ .Values.influxdb.image.repository }}:{{ .Values.influxdb.image.tag }}"
+          command:
+          - "influxdb3"
+          - "serve"
+          - "--node-id=node0"
+          - "--object-store=file"
+          - "--data-dir=/var/lib/influxdb3/data"
+          - "--plugin-dir=/var/lib/influxdb3/plugins"
+          - "--without-auth"
+          ports:
+            - containerPort: 8181
+              name: influxdb
+          volumeMounts:
+            - name: influxdb-data
+              mountPath: /var/lib/influxdb3/data # Path for InfluxDB 2.x
+  volumeClaimTemplates:
+    - metadata:
+        name: influxdb-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        # storageClassName: "standard" # Uncomment and change to your provider (gp2, longhorn, etc.)
+        resources:
+          requests:
+            storage: 10Gi

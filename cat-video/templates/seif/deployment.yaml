@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seif-deployment
+  labels:
+    app: {{ .Values.seif.name }}
+spec:
+  replicas: {{ .Values.seif.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.seif.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.seif.name }}
+    spec:
+      containers:
+        - name: {{ .Values.seif.name }}
+          env:
+            - name: DB_HOST
+              value: "http://influxdb-svc.default.svc.cluster.local:8181"
+            - name: GRPC_SERVER_HOST
+              value: ":50051"
+          image: "{{ .Values.seif.image.repository }}:{{ .Values.seif.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.seif.service.targetPort }}
