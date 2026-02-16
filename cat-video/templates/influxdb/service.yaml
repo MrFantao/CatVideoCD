@@ -3,13 +3,11 @@ kind: Service
 metadata:
   name: influxdb-svc
 spec:
-  type: NodePort
-  #type: {{ .Values.influxdb.service.type }}
+  type: {{ .Values.influxdb.service.type }}
   ports:
     - port: {{ .Values.influxdb.service.port }}
       targetPort: {{ .Values.influxdb.service.targetPort }}
-      nodePort: 30081
       protocol: TCP
-  #clusterIP: None
+      nodePort: 30081
   selector:
     app: {{ .Values.influxdb.name }}
